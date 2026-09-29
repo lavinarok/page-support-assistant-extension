@@ -92,3 +92,22 @@ header p {
   font-size: 12px;
   line-height: 1.4;
 }
+
+.actions button:not(:disabled) {
+  cursor: pointer;
+}
+
+.actions button:not(:disabled):hover {
+  background: #f1f3f4;
+}
+
+.result-card {
+  border-color: #c7d2fe;
+}
+
+.result-content {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}

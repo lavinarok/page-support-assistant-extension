@@ -45,21 +45,46 @@
     </section>
 
     <section class="actions">
-      <button type="button" disabled>
+      <button
+        id="summarize-button"
+        type="button"
+        disabled
+      >
         Resumir
       </button>
 
-      <button type="button" disabled>
+      <button
+        id="explain-button"
+        type="button"
+        disabled
+      >
         Explicar
       </button>
 
-      <button type="button" disabled>
+      <button
+        id="suggest-reply-button"
+        type="button"
+        disabled
+      >
         Sugerir resposta
       </button>
     </section>
 
+    <section
+      id="result-section"
+      class="card result-card"
+      hidden
+    >
+      <h2 id="result-title">Resultado</h2>
+
+      <p
+        id="result-content"
+        class="result-content"
+      ></p>
+    </section>
+
     <p class="hint">
-      As ações de IA serão habilitadas na próxima etapa.
+      Modo de demonstração: as respostas desta etapa são geradas localmente, sem IA.
     </p>
   </main>
 
