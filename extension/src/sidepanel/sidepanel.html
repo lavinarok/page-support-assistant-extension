@@ -2,72 +2,159 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
   >
+
   <title>Page Support Assistant</title>
-  <link rel="stylesheet" href="sidepanel.css">
+
+  <link
+    rel="stylesheet"
+    href="sidepanel.css"
+  >
 </head>
 
 <body>
-  <main class="container">
-    <header>
-      <h1>Page Support Assistant</h1>
-      <p>
-        Analise conteúdos selecionados diretamente da página.
-      </p>
+  <main class="app">
+    <header class="app-header">
+      <div>
+        <span class="eyebrow">
+          Assistente de página
+        </span>
+
+        <h1>
+          Page Support Assistant
+        </h1>
+
+        <p class="subtitle">
+          Analise conteúdos da página e gere respostas sem sair do contexto.
+        </p>
+      </div>
+
+      <button
+        id="theme-toggle"
+        class="icon-button"
+        type="button"
+        aria-label="Alternar tema"
+        title="Alternar tema"
+      >
+        <span
+          id="theme-icon"
+          aria-hidden="true"
+        >
+          ☾
+        </span>
+      </button>
     </header>
 
     <section class="card">
-      <h2>Texto selecionado</h2>
+      <div class="section-heading">
+        <span class="step">
+          1
+        </span>
 
-      <p
+        <div>
+          <h2>
+            Texto selecionado
+          </h2>
+
+          <p>
+            Conteúdo capturado da página atual.
+          </p>
+        </div>
+      </div>
+
+      <div
         id="selected-text"
         class="selected-text"
       >
-        Selecione um texto em uma página e use o botão direito.
-      </p>
+        Selecione um texto em uma página, clique com o botão direito e escolha
+        "Analisar com Page Support Assistant".
+      </div>
+
+      <div
+        id="source-section"
+        class="source"
+        hidden
+      >
+        <span>
+          Origem
+        </span>
+
+        <a
+          id="page-url"
+          href="#"
+          target="_blank"
+          rel="noreferrer"
+        ></a>
+      </div>
     </section>
 
-    <section
-      id="source-section"
-      class="source"
-      hidden
-    >
-      <span>Origem</span>
-      <a
-        id="page-url"
-        href="#"
-        target="_blank"
-        rel="noreferrer"
-      ></a>
-    </section>
+    <section class="card">
+      <div class="section-heading">
+        <span class="step">
+          2
+        </span>
 
-    <section class="actions">
-      <button
-        id="summarize-button"
-        type="button"
-        disabled
-      >
-        Resumir
-      </button>
+        <div>
+          <h2>
+            Escolha uma ação
+          </h2>
 
-      <button
-        id="explain-button"
-        type="button"
-        disabled
-      >
-        Explicar
-      </button>
+          <p>
+            O conteúdo será enviado ao backend para processamento.
+          </p>
+        </div>
+      </div>
 
-      <button
-        id="suggest-reply-button"
-        type="button"
-        disabled
-      >
-        Sugerir resposta
-      </button>
+      <div class="actions">
+        <button
+          id="summarize-button"
+          class="action-button"
+          type="button"
+          disabled
+        >
+          <span class="action-icon">
+            ≡
+          </span>
+
+          <span>
+            Resumir
+          </span>
+        </button>
+
+        <button
+          id="explain-button"
+          class="action-button"
+          type="button"
+          disabled
+        >
+          <span class="action-icon">
+            ?
+          </span>
+
+          <span>
+            Explicar
+          </span>
+        </button>
+
+        <button
+          id="suggest-reply-button"
+          class="action-button action-button-primary"
+          type="button"
+          disabled
+        >
+          <span class="action-icon">
+            ✦
+          </span>
+
+          <span>
+            Sugerir resposta
+          </span>
+        </button>
+      </div>
     </section>
 
     <section
@@ -75,7 +162,29 @@
       class="card result-card"
       hidden
     >
-      <h2 id="result-title">Resultado</h2>
+      <div class="result-header">
+        <div class="section-heading">
+          <span class="step">
+            3
+          </span>
+
+          <div>
+            <h2 id="result-title">
+              Resultado
+            </h2>
+
+            <p>
+              Conteúdo gerado pelo assistente.
+            </p>
+          </div>
+        </div>
+
+        <span
+          id="provider-badge"
+          class="provider-badge"
+          hidden
+        ></span>
+      </div>
 
       <p
         id="result-content"
@@ -90,12 +199,15 @@
       >
         Inserir na página
       </button>
-      
     </section>
 
-    <p class="hint">
-      A análise é processada pelo backend configurado para o projeto.
-    </p>
+    <footer class="footer">
+      <span class="status-dot"></span>
+
+      <span>
+        Backend local conectado ao fluxo de análise
+      </span>
+    </footer>
   </main>
 
   <script

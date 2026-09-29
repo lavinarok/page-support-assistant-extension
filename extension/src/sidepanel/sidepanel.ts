@@ -1,6 +1,25 @@
 const API_URL =
   "http://127.0.0.1:3000";
 
+const themeToggle =
+  document.querySelector<HTMLButtonElement>(
+    "#theme-toggle"
+  );
+
+const themeIcon =
+  document.querySelector<HTMLSpanElement>(
+    "#theme-icon"
+  );
+
+const providerBadge =
+  document.querySelector<HTMLSpanElement>(
+    "#provider-badge"
+  );
+
+type Theme =
+  | "light"
+  | "dark";
+
 const selectedTextElement =
   document.querySelector<HTMLParagraphElement>(
     "#selected-text"
@@ -80,6 +99,78 @@ let currentResult = "";
 let currentAction:
   AnalysisAction | null = null;
 
+function applyTheme(
+  theme: Theme
+): void {
+  document.documentElement.dataset.theme =
+    theme;
+
+  if (themeIcon) {
+    themeIcon.textContent =
+      theme === "dark"
+        ? "☀"
+        : "☾";
+  }
+
+  if (themeToggle) {
+    themeToggle.setAttribute(
+      "aria-label",
+      theme === "dark"
+        ? "Ativar tema claro"
+        : "Ativar tema escuro"
+    );
+  }
+}
+
+async function loadTheme():
+Promise<void> {
+  const {
+    theme
+  } =
+    await chrome.storage.local.get(
+      "theme"
+    );
+
+  if (
+    theme === "light" ||
+    theme === "dark"
+  ) {
+    applyTheme(theme);
+    return;
+  }
+
+  const prefersDark =
+    window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
+  applyTheme(
+    prefersDark
+      ? "dark"
+      : "light"
+  );
+}
+
+themeToggle?.addEventListener(
+  "click",
+  async () => {
+    const currentTheme =
+      document.documentElement
+        .dataset.theme;
+
+    const nextTheme: Theme =
+      currentTheme === "dark"
+        ? "light"
+        : "dark";
+
+    applyTheme(nextTheme);
+
+    await chrome.storage.local.set({
+      theme: nextTheme
+    });
+  }
+);
+
 function setActionsEnabled(
   enabled: boolean
 ): void {
@@ -105,7 +196,9 @@ function hideInsertReplyButton(): void {
 function resetResultState(): void {
   currentResult = "";
   currentAction = null;
-
+  if (providerBadge) {
+    providerBadge.hidden = true;
+  }
   hideInsertReplyButton();
 }
 
@@ -231,6 +324,17 @@ async function analyze(
 
     currentAction =
       action;
+
+    if (
+      providerBadge &&
+      typeof data.provider === "string"
+    ) {
+      providerBadge.textContent =
+        data.provider;
+
+      providerBadge.hidden =
+        false;
+    }
 
     showResult(
       title,
@@ -364,4 +468,5 @@ chrome.storage.onChanged.addListener(
 setActionsEnabled(false);
 hideInsertReplyButton();
 
+void loadTheme();
 void loadSelection();
