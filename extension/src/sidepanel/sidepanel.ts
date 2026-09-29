@@ -1,29 +1,55 @@
+const API_URL =
+  "http://127.0.0.1:3000";
+
 const selectedTextElement =
-  document.querySelector<HTMLParagraphElement>("#selected-text");
+  document.querySelector<HTMLParagraphElement>(
+    "#selected-text"
+  );
 
 const pageUrlElement =
-  document.querySelector<HTMLAnchorElement>("#page-url");
+  document.querySelector<HTMLAnchorElement>(
+    "#page-url"
+  );
 
 const sourceSection =
-  document.querySelector<HTMLElement>("#source-section");
+  document.querySelector<HTMLElement>(
+    "#source-section"
+  );
 
 const summarizeButton =
-  document.querySelector<HTMLButtonElement>("#summarize-button");
+  document.querySelector<HTMLButtonElement>(
+    "#summarize-button"
+  );
 
 const explainButton =
-  document.querySelector<HTMLButtonElement>("#explain-button");
+  document.querySelector<HTMLButtonElement>(
+    "#explain-button"
+  );
 
 const suggestReplyButton =
-  document.querySelector<HTMLButtonElement>("#suggest-reply-button");
+  document.querySelector<HTMLButtonElement>(
+    "#suggest-reply-button"
+  );
 
 const resultSection =
-  document.querySelector<HTMLElement>("#result-section");
+  document.querySelector<HTMLElement>(
+    "#result-section"
+  );
 
 const resultTitle =
-  document.querySelector<HTMLHeadingElement>("#result-title");
+  document.querySelector<HTMLHeadingElement>(
+    "#result-title"
+  );
 
 const resultContent =
-  document.querySelector<HTMLParagraphElement>("#result-content");
+  document.querySelector<HTMLParagraphElement>(
+    "#result-content"
+  );
+
+type AnalysisAction =
+  | "summarize"
+  | "explain"
+  | "suggest-reply";
 
 interface SelectionState {
   selectedText?: string;
@@ -31,9 +57,18 @@ interface SelectionState {
   capturedAt?: string;
 }
 
-let currentSelectedText = "";
+interface AnalyzeResponse {
+  result?: string;
+  error?: string;
+  provider?: string;
+}
 
-function setActionsEnabled(enabled: boolean): void {
+let currentSelectedText = "";
+let currentPageUrl = "";
+
+function setActionsEnabled(
+  enabled: boolean
+): void {
   if (summarizeButton) {
     summarizeButton.disabled = !enabled;
   }
@@ -47,26 +82,43 @@ function setActionsEnabled(enabled: boolean): void {
   }
 }
 
-function renderSelection(state: SelectionState): void {
+function renderSelection(
+  state: SelectionState
+): void {
   if (
     selectedTextElement &&
     typeof state.selectedText === "string" &&
     state.selectedText.length > 0
   ) {
-    currentSelectedText = state.selectedText;
-    selectedTextElement.textContent = state.selectedText;
+    currentSelectedText =
+      state.selectedText;
+
+    selectedTextElement.textContent =
+      state.selectedText;
+
     setActionsEnabled(true);
+  }
+
+  if (
+    typeof state.pageUrl === "string"
+  ) {
+    currentPageUrl =
+      state.pageUrl;
   }
 
   if (
     pageUrlElement &&
     sourceSection &&
-    typeof state.pageUrl === "string" &&
-    state.pageUrl.length > 0
+    currentPageUrl.length > 0
   ) {
-    pageUrlElement.href = state.pageUrl;
-    pageUrlElement.textContent = state.pageUrl;
-    sourceSection.hidden = false;
+    pageUrlElement.href =
+      currentPageUrl;
+
+    pageUrlElement.textContent =
+      currentPageUrl;
+
+    sourceSection.hidden =
+      false;
   }
 }
 
@@ -82,77 +134,117 @@ function showResult(
     return;
   }
 
-  resultTitle.textContent = title;
-  resultContent.textContent = content;
-  resultSection.hidden = false;
+  resultTitle.textContent =
+    title;
+
+  resultContent.textContent =
+    content;
+
+  resultSection.hidden =
+    false;
 }
 
-function createMockSummary(text: string): string {
-  const normalizedText =
-    text.replace(/\s+/g, " ").trim();
-
-  if (normalizedText.length <= 220) {
-    return normalizedText;
-  }
-
-  return `${normalizedText.slice(0, 220).trim()}...`;
-}
-
-function createMockExplanation(text: string): string {
-  const wordCount =
-    text.trim().split(/\s+/).filter(Boolean).length;
-
-  return (
-    `O texto selecionado possui aproximadamente ${wordCount} palavras. ` +
-    "Nesta versão de demonstração, esta ação apenas comprova que o conteúdo " +
-    "capturado pode ser processado e transformado antes de ser exibido novamente. " +
-    "Na próxima etapa, esse processamento poderá ser substituído por uma IA."
-  );
-}
-
-function createMockReply(text: string): string {
-  const excerpt =
-    text.replace(/\s+/g, " ").trim().slice(0, 120);
-
-  return (
-    "Obrigado pela mensagem. Entendi o contexto apresentado" +
-    (excerpt ? `: "${excerpt}${text.length > 120 ? "..." : ""}"` : ".") +
-    " Vou analisar as informações e retornar com uma orientação adequada."
-  );
-}
-
-summarizeButton?.addEventListener("click", () => {
+async function analyze(
+  action: AnalysisAction,
+  title: string
+): Promise<void> {
   if (!currentSelectedText) {
     return;
   }
 
-  showResult(
-    "Resumo",
-    createMockSummary(currentSelectedText)
-  );
-});
+  setActionsEnabled(false);
 
-explainButton?.addEventListener("click", () => {
-  if (!currentSelectedText) {
-    return;
+  showResult(
+    title,
+    "Analisando..."
+  );
+
+  try {
+    const response =
+      await fetch(
+        `${API_URL}/analyze`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+          body: JSON.stringify({
+            action,
+            text:
+              currentSelectedText,
+            pageUrl:
+              currentPageUrl
+          })
+        }
+      );
+
+    const data =
+      await response.json() as AnalyzeResponse;
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ??
+        "Não foi possível realizar a análise."
+      );
+    }
+
+    if (
+      typeof data.result !== "string"
+    ) {
+      throw new Error(
+        "O servidor retornou uma resposta inválida."
+      );
+    }
+
+    showResult(
+      title,
+      data.result
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Erro desconhecido.";
+
+    showResult(
+      "Erro",
+      message
+    );
+  } finally {
+    setActionsEnabled(true);
   }
+}
 
-  showResult(
-    "Explicação",
-    createMockExplanation(currentSelectedText)
-  );
-});
-
-suggestReplyButton?.addEventListener("click", () => {
-  if (!currentSelectedText) {
-    return;
+summarizeButton?.addEventListener(
+  "click",
+  () => {
+    void analyze(
+      "summarize",
+      "Resumo"
+    );
   }
+);
 
-  showResult(
-    "Resposta sugerida",
-    createMockReply(currentSelectedText)
-  );
-});
+explainButton?.addEventListener(
+  "click",
+  () => {
+    void analyze(
+      "explain",
+      "Explicação"
+    );
+  }
+);
+
+suggestReplyButton?.addEventListener(
+  "click",
+  () => {
+    void analyze(
+      "suggest-reply",
+      "Resposta sugerida"
+    );
+  }
+);
 
 async function loadSelection(): Promise<void> {
   const state =
