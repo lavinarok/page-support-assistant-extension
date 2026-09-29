@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <title>Page Support Assistant</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <h1>Page Support Assistant</h1>
+      <p>
+        Analise conteúdos selecionados diretamente da página.
+      </p>
+    </header>
+
+    <section class="card">
+      <h2>Texto selecionado</h2>
+
+      <p
+        id="selected-text"
+        class="selected-text"
+      >
+        Selecione um texto em uma página e use o botão direito.
+      </p>
+    </section>
+
+    <section
+      id="source-section"
+      class="source"
+      hidden
+    >
+      <span>Origem</span>
+      <a
+        id="page-url"
+        href="#"
+        target="_blank"
+        rel="noreferrer"
+      ></a>
+    </section>
+
+    <section class="actions">
+      <button type="button" disabled>
+        Resumir
+      </button>
+
+      <button type="button" disabled>
+        Explicar
+      </button>
+
+      <button type="button" disabled>
+        Sugerir resposta
+      </button>
+    </section>
+
+    <p class="hint">
+      As ações de IA serão habilitadas na próxima etapa.
+    </p>
+  </main>
+
+  <script
+    type="module"
+    src="sidepanel.js"
+  ></script>
+</body>
+</html>

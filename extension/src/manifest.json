@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Page Support Assistant",
+  "version": "1.0.0",
+  "description": "Assistente para análise de textos selecionados em páginas web.",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "sidePanel"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
+  }
+}
