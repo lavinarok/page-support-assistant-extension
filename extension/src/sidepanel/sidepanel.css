@@ -111,3 +111,20 @@ header p {
   line-height: 1.6;
   white-space: pre-wrap;
 }
+
+.insert-reply-button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: #1a73e8;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.insert-reply-button:hover {
+  background: #1557b0;
+}

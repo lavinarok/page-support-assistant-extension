@@ -46,6 +46,11 @@ const resultContent =
     "#result-content"
   );
 
+const insertReplyButton =
+  document.querySelector<HTMLButtonElement>(
+    "#insert-reply-button"
+  );
+
 type AnalysisAction =
   | "summarize"
   | "explain"
@@ -63,8 +68,17 @@ interface AnalyzeResponse {
   provider?: string;
 }
 
+interface InsertReplyResponse {
+  ok?: boolean;
+  error?: string;
+}
+
 let currentSelectedText = "";
 let currentPageUrl = "";
+let currentResult = "";
+
+let currentAction:
+  AnalysisAction | null = null;
 
 function setActionsEnabled(
   enabled: boolean
@@ -80,6 +94,19 @@ function setActionsEnabled(
   if (suggestReplyButton) {
     suggestReplyButton.disabled = !enabled;
   }
+}
+
+function hideInsertReplyButton(): void {
+  if (insertReplyButton) {
+    insertReplyButton.hidden = true;
+  }
+}
+
+function resetResultState(): void {
+  currentResult = "";
+  currentAction = null;
+
+  hideInsertReplyButton();
 }
 
 function renderSelection(
@@ -154,6 +181,8 @@ async function analyze(
 
   setActionsEnabled(false);
 
+  resetResultState();
+
   showResult(
     title,
     "Analisando..."
@@ -180,7 +209,7 @@ async function analyze(
       );
 
     const data =
-      await response.json() as AnalyzeResponse;
+      (await response.json()) as AnalyzeResponse;
 
     if (!response.ok) {
       throw new Error(
@@ -197,11 +226,27 @@ async function analyze(
       );
     }
 
+    currentResult =
+      data.result;
+
+    currentAction =
+      action;
+
     showResult(
       title,
       data.result
     );
+
+    if (
+      insertReplyButton &&
+      action === "suggest-reply"
+    ) {
+      insertReplyButton.hidden =
+        false;
+    }
   } catch (error) {
+    resetResultState();
+
     const message =
       error instanceof Error
         ? error.message
@@ -246,7 +291,46 @@ suggestReplyButton?.addEventListener(
   }
 );
 
-async function loadSelection(): Promise<void> {
+insertReplyButton?.addEventListener(
+  "click",
+  async () => {
+    if (
+      currentAction !== "suggest-reply" ||
+      !currentResult
+    ) {
+      return;
+    }
+
+    try {
+      const response =
+        await chrome.runtime.sendMessage({
+          type: "INSERT_REPLY",
+          text: currentResult
+        }) as InsertReplyResponse;
+
+      if (!response?.ok) {
+        showResult(
+          "Erro",
+          response?.error ??
+          "Não foi possível iniciar a inserção."
+        );
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível iniciar a inserção.";
+
+      showResult(
+        "Erro",
+        message
+      );
+    }
+  }
+);
+
+async function loadSelection():
+Promise<void> {
   const state =
     await chrome.storage.session.get([
       "selectedText",
@@ -266,8 +350,11 @@ chrome.storage.onChanged.addListener(
       return;
     }
 
+    resetResultState();
+
     if (resultSection) {
-      resultSection.hidden = true;
+      resultSection.hidden =
+        true;
     }
 
     void loadSelection();
@@ -275,4 +362,6 @@ chrome.storage.onChanged.addListener(
 );
 
 setActionsEnabled(false);
+hideInsertReplyButton();
+
 void loadSelection();

@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "description": "Assistente para análise de textos selecionados em páginas web.",
   "permissions": [
+    "activeTab",
     "contextMenus",
+    "scripting",
     "storage",
     "sidePanel"
   ],
