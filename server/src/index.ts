@@ -5,6 +5,7 @@ import express from "express";
 import {
   analyzeText,
   getAIProvider,
+  isGeminiConfigured,
   isOpenAIConfigured,
   type AnalysisAction
 } from "./ai-service.js";
@@ -33,7 +34,9 @@ app.get("/health", (_request, response) => {
     status: "ok",
     provider: getAIProvider(),
     openaiConfigured:
-      isOpenAIConfigured()
+      isOpenAIConfigured(),
+    geminiConfigured:
+      isGeminiConfigured()
   });
 });
 
@@ -99,11 +102,108 @@ app.post("/analyze", async (request, response) => {
     if (
       message.includes(
         "OPENAI_API_KEY"
+      ) ||
+      message.includes(
+        "GEMINI_API_KEY"
       )
     ) {
       response.status(503).json({
-        error: message
+        error:
+          "O provedor selecionado não está configurado."
       });
+
+      return;
+    }
+
+    if (
+      message.startsWith(
+        "GEMINI_HTTP_401"
+      )
+    ) {
+      response.status(401).json({
+        error:
+          "A autenticação com o Gemini foi recusada."
+      });
+
+      return;
+    }
+
+    if (
+      message.startsWith(
+        "GEMINI_HTTP_403"
+      )
+    ) {
+      response.status(403).json({
+        error:
+          "Acesso ao Gemini negado."
+      });
+
+      return;
+    }
+
+    if (
+      message.startsWith(
+        "GEMINI_HTTP_429"
+      )
+    ) {
+      response.status(429).json({
+        error:
+          "Limite ou quota do Gemini atingida."
+      });
+
+      return;
+    }
+
+    if (
+      message.startsWith(
+        "GEMINI_TIMEOUT"
+      )
+    ) {
+      response.status(504).json({
+        error:
+          "A chamada ao Gemini excedeu o tempo limite."
+      });
+
+      return;
+    }
+
+    const geminiServerError =
+      message.match(
+        /^GEMINI_HTTP_(5\d{2})/
+      );
+
+    if (geminiServerError) {
+      response.status(502).json({
+        error:
+          "O serviço Gemini apresentou uma falha temporária."
+      });
+
+      return;
+    }
+
+    if (
+      message.startsWith(
+        "GEMINI_EMPTY_RESPONSE"
+      )
+    ) {
+      response.status(502).json({
+        error:
+          "O Gemini respondeu sem conteúdo utilizável."
+      });
+
+      return;
+    }
+
+    if (
+      message.startsWith(
+        "GEMINI_HTTP_"
+      )
+    ) {
+      response.status(502).json({
+        error:
+          "A requisição ao Gemini foi recusada."
+      });
+
       return;
     }
 
