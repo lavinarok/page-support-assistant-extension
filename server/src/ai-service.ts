@@ -47,7 +47,7 @@ const geminiApiKey =
 
 const geminiModel =
   process.env.GEMINI_MODEL ??
-  "gemini-2.5-flash";
+  "gemini-3.5-flash-lite";
 
 const GEMINI_TIMEOUT_MS =
   15_000;
@@ -231,8 +231,8 @@ async function analyzeWithGemini(
                   GEMINI_MAX_OUTPUT_TOKENS,
 
                 thinkingConfig: {
-                  thinkingBudget:
-                    0
+                  thinkingLevel:
+                    "minimal"
                 }
               }
             }),
